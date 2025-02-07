@@ -63,6 +63,20 @@ def delete_task(task_id):
     else:
         print(f"Tarefa com ID {task_id} não encontrada.")
 
+def mark_task_status(task_id, new_status):
+    """Atualiza o status de uma tarefa."""
+    tasks = load_tasks()
+
+    for task in tasks:
+        if task["id"] == task_id:
+            task["status"] = new_status
+            task["updatedAt"] = datetime.now().isoformat()
+            save_tasks(tasks)
+            print(f"Status da tarefa atualizado: {new_status} (ID: {task_id})")
+            return
+
+    print(f"Tarefa com ID {task_id} não encontrada.")
+
 def main():
     parser = argparse.ArgumentParser(description="CLI para gerenciamento de tarefas.")
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponíveis")
@@ -77,6 +91,16 @@ def main():
     delete_parser = subparsers.add_parser("delete", help="Remove uma tarefa existente")
     delete_parser.add_argument("task_id", type=str, help="ID da tarefa a ser removida")
 
+    mark_in_progress_parser = subparsers.add_parser(
+        "mark-in-progress", help="Marca uma tarefa como 'in-progress'"
+    )
+    mark_in_progress_parser.add_argument("task_id", type=str, help="ID da tarefa a ser atualizada")
+
+    mark_done_parser = subparsers.add_parser(
+        "mark-done", help="Marca uma tarefa como 'done'"
+    )
+    mark_done_parser.add_argument("task_id", type=str, help="ID da tarefa a ser atualizada")
+
     args = parser.parse_args()
 
     if args.command == "add":
@@ -85,6 +109,10 @@ def main():
         update_task(args.task_id, args.new_description)
     elif args.command == "delete":
         delete_task(args.task_id)
+    elif args.command == "mark-in-progress":
+        mark_task_status(args.task_id, "in-progress")
+    elif args.command == "mark-done":
+        mark_task_status(args.task_id, "done")
     else:
         parser.print_help()
 
