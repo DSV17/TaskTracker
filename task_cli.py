@@ -77,6 +77,26 @@ def mark_task_status(task_id, new_status):
 
     print(f"Tarefa com ID {task_id} não encontrada.")
 
+def list_tasks(status=None):
+    """Lista todas as tarefas ou filtra por status."""
+    tasks = load_tasks()
+
+    if status:
+        tasks = [task for task in tasks if task["status"] == status]
+
+    if not tasks:
+        print(f"Nenhuma tarefa encontrada{' com status ' + status if status else ''}.")
+        return
+
+    print(f"Tarefas{' com status ' + status if status else ''}:")
+    for task in tasks:
+        print(f"ID: {task['id']}")
+        print(f"Descrição: {task['description']}")
+        print(f"Status: {task['status']}")
+        print(f"Criada em: {task['createdAt']}")
+        print(f"Atualizada em: {task['updatedAt']}")
+        print("-" * 30)
+
 def main():
     parser = argparse.ArgumentParser(description="CLI para gerenciamento de tarefas.")
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponíveis")
@@ -101,6 +121,9 @@ def main():
     )
     mark_done_parser.add_argument("task_id", type=str, help="ID da tarefa a ser atualizada")
 
+    list_parser = subparsers.add_parser("list", help="Lista todas as tarefas ou filtra por status")
+    list_parser.add_argument("status", nargs="?", type=str, help="Status das tarefas a serem listadas")
+
     args = parser.parse_args()
 
     if args.command == "add":
@@ -113,6 +136,8 @@ def main():
         mark_task_status(args.task_id, "in-progress")
     elif args.command == "mark-done":
         mark_task_status(args.task_id, "done")
+    elif args.command == "list":
+        list_tasks(args.status)
     else:
         parser.print_help()
 
