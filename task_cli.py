@@ -37,6 +37,32 @@ def add_task(description):
     save_tasks(tasks)
     print(f"Tarefa adicionada: {new_task['description']} (ID: {new_task['id']})")
 
+def update_task(task_id, new_description):
+    """Atualiza a descrição de uma tarefa existente."""
+    tasks = load_tasks()
+
+    for task in tasks:
+        if task["id"] == task_id:
+            task["description"] = new_description
+            task["updatedAt"] = datetime.now().isoformat()
+            save_tasks(tasks)
+            print(f"Tarefa atualizada: {new_description} (ID: {task_id})")
+            return
+
+    print(f"Tarefa com ID {task_id} não encontrada.")
+
+def delete_task(task_id):
+    """Remove uma tarefa da lista."""
+    tasks = load_tasks()
+
+    updated_tasks = [task for task in tasks if task["id"] != task_id]
+
+    if len(updated_tasks) < len(tasks):
+        save_tasks(updated_tasks)
+        print(f"Tarefa removida (ID: {task_id}).")
+    else:
+        print(f"Tarefa com ID {task_id} não encontrada.")
+
 def main():
     parser = argparse.ArgumentParser(description="CLI para gerenciamento de tarefas.")
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponíveis")
@@ -44,10 +70,21 @@ def main():
     add_parser = subparsers.add_parser("add", help="Adiciona uma nova tarefa")
     add_parser.add_argument("description", type=str, help="Descrição da tarefa")
 
+    update_parser = subparsers.add_parser("update", help="Atualiza uma tarefa existente")
+    update_parser.add_argument("task_id", type=str, help="ID da tarefa a ser atualizada")
+    update_parser.add_argument("new_description", type=str, help="Nova descrição da tarefa")
+
+    delete_parser = subparsers.add_parser("delete", help="Remove uma tarefa existente")
+    delete_parser.add_argument("task_id", type=str, help="ID da tarefa a ser removida")
+
     args = parser.parse_args()
 
     if args.command == "add":
         add_task(args.description)
+    elif args.command == "update":
+        update_task(args.task_id, args.new_description)
+    elif args.command == "delete":
+        delete_task(args.task_id)
     else:
         parser.print_help()
 
